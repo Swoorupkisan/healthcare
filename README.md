@@ -78,3 +78,29 @@ This application is for **informational purposes only** and does **not** constit
 - India: **102** (Ambulance) / **112** (Emergency)
 - US: **911**
 - UK: **999**
+
+---
+
+## Streamlit Deployment
+
+This repository now includes [streamlit_app.py](streamlit_app.py) for direct Streamlit deployment.
+
+### Local Run (Streamlit)
+
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
+### Streamlit Cloud Steps
+
+1. Push this repository to GitHub.
+2. In Streamlit Cloud, create a new app from this repo.
+3. Set **Main file path** to `streamlit_app.py`.
+4. Add secret in Streamlit Cloud:
+
+```toml
+GROQ_API_KEY = "gsk_your_real_key_here"
+```
+
+5. Deploy.
