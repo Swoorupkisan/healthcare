@@ -6,11 +6,11 @@ A modern AI-powered healthcare chatbot built with **Python (FastAPI)** + **Groq 
 
 ## 🚀 Quick Start
 
-### 1. Install dependencies
+### 1. Install dependencies (FastAPI local run)
 
 ```bash
 cd healthcare_chatbot
-pip install -r requirements.txt
+pip install -r requirements-fastapi.txt
 ```
 
 ### 2. Set your Groq API Key
@@ -84,6 +84,9 @@ This application is for **informational purposes only** and does **not** constit
 ## Streamlit Deployment
 
 This repository now includes [streamlit_app.py](streamlit_app.py) for direct Streamlit deployment.
+
+`requirements.txt` is intentionally kept Streamlit-focused for cloud compatibility.
+Use `requirements-fastapi.txt` when running `app.py` locally.
 
 ### Local Run (Streamlit)
 
