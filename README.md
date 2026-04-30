@@ -6,7 +6,7 @@ A modern AI-powered healthcare chatbot built with **Python (FastAPI)** + **Groq 
 
 ## 🚀 Quick Start
 
-### 1. Install dependencies (FastAPI local run)
+### 1. Install dependencies for the HTML app
 
 ```bash
 cd healthcare_chatbot
@@ -24,21 +24,19 @@ export GROQ_API_KEY=your_key_here
 
 **Option B — Edit `app.py` directly:**
 ```python
-GROQ_API_KEY = "your_key_here"   # line 12
+GROQ_API_KEY = "your_key_here"
 ```
 
-### 3. Run the server
+### 3. Run the HTML frontend server
 
 ```bash
 python app.py
-# OR
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### 4. Open in browser
 
 ```
-http://localhost:8000
+http://localhost:8081
 ```
 
 ---
@@ -53,7 +51,7 @@ http://localhost:8000
 | 🎙️ **Voice Input** | Speech-to-text for hands-free symptom entry |
 | 📊 **Severity Rating** | Mild / Moderate / Severe self-assessment |
 | 🚨 **Emergency Banner** | Auto-detects severe conditions, shows emergency call button |
-| 💬 **Streaming** | Real-time streaming responses |
+| 💬 **Chat API** | FastAPI backend returns complete AI responses to the HTML UI |
 | 📱 **Responsive** | Works on mobile and desktop |
 
 ---
@@ -62,8 +60,8 @@ http://localhost:8000
 
 ```
 healthcare_chatbot/
-├── app.py          # FastAPI backend
-├── index.html      # Frontend UI (served by FastAPI)
+├── app.py          # FastAPI backend serving the HTML UI
+├── index.html      # Frontend UI
 ├── requirements.txt
 └── README.md
 ```
@@ -107,3 +105,14 @@ GROQ_API_KEY = "gsk_your_real_key_here"
 ```
 
 5. Deploy.
+
+## Local Run (HTML / FastAPI)
+
+The default local experience is the FastAPI app that serves [index.html](index.html).
+
+```bash
+pip install -r requirements-fastapi.txt
+python app.py
+```
+
+Then open `http://localhost:8081` in your browser.
