@@ -106,6 +106,30 @@ GROQ_API_KEY = "gsk_your_real_key_here"
 
 5. Deploy.
 
+### Render Deployment
+
+This repo includes [render.yaml](render.yaml), so you can deploy it on Render as a Blueprint.
+
+1. Push this repository to GitHub.
+2. In Render, choose **New +** -> **Blueprint**.
+3. Connect the GitHub repository and select this repo.
+4. When Render asks for `GROQ_API_KEY`, paste your Groq API key.
+5. Deploy.
+
+If you create a Render Web Service manually instead of using the Blueprint, use:
+
+```bash
+pip install -r requirements.txt
+```
+
+as the build command, and:
+
+```bash
+streamlit run streamlit_app.py --server.port $PORT --server.address 0.0.0.0
+```
+
+as the start command.
+
 ## Local Run (HTML / FastAPI)
 
 The default local experience is the FastAPI app that serves [index.html](index.html).

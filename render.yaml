@@ -1,11 +1,10 @@
 services:
   - type: web
     name: healthai
-    env: python
+    runtime: python
     plan: free
-    buildCommand: pip install -r requirements-fastapi.txt
-    startCommand: python app.py
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run streamlit_app.py --server.port $PORT --server.address 0.0.0.0
     envVars:
       - key: GROQ_API_KEY
-        scope: run
-        isFile: false
+        sync: false
