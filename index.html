@@ -26,6 +26,25 @@
     --radius: 16px;
   }
 
+  /* Light theme */
+  :root[data-theme="light"] {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --surface2: #eff3f8;
+    --border: #d0dae8;
+    --border2: #b8c9dc;
+    --accent: #0066cc;
+    --accent2: #0052a3;
+    --accent-glow: rgba(0, 102, 204, 0.12);
+    --green: #10a454;
+    --yellow: #f5a623;
+    --red: #d32f2f;
+    --text: #1a202c;
+    --text2: #4a5568;
+    --text3: #718096;
+    --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
@@ -277,8 +296,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(13,23,36,0.8);
+    background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(12px);
+    background-color: var(--surface);
   }
 
   .topbar-left h2 {
@@ -508,11 +528,45 @@
     40% { transform: translateY(-8px); opacity: 1; }
   }
 
+  /* TTS Button */
+  .msg-controls {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .tts-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .tts-btn:hover {
+    background: var(--border);
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  .tts-btn.playing {
+    background: var(--accent-glow);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
   /* ── INPUT AREA ── */
   #input-area {
     padding: 16px 28px 24px;
     border-top: 1px solid var(--border);
-    background: rgba(7,13,23,0.8);
+    background: var(--surface);
     backdrop-filter: blur(12px);
   }
 
@@ -650,15 +704,41 @@
     font-size: 16px;
   }
 
+  /* Sidebar backdrop */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 99;
+  }
+
+  .sidebar-backdrop.open { display: block; }
+
+  .close-sidebar-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text2);
+    padding: 8px;
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: auto;
+  }
+
   @media (max-width: 768px) {
     #sidebar {
       position: fixed;
       left: 0; top: 0; bottom: 0;
       z-index: 100;
       transform: translateX(-100%);
+      width: 280px;
     }
     #sidebar.open { transform: translateX(0); }
     .menu-toggle { display: flex; align-items: center; justify-content: center; }
+    .close-sidebar-btn { display: flex; align-items: center; justify-content: center; }
+    .logo { justify-content: space-between; }
     .welcome-cards { grid-template-columns: 1fr; }
     #messages { padding: 16px; }
     #input-area { padding: 12px 16px 20px; }
@@ -667,6 +747,9 @@
 </head>
 <body>
 <div id="app">
+  <!-- SIDEBAR BACKDROP -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+  
   <!-- SIDEBAR -->
   <div id="sidebar">
     <div class="logo">
@@ -675,18 +758,21 @@
         <h1>HealthAI</h1>
         <span>Intelligent Medical Assistant</span>
       </div>
+      <button class="close-sidebar-btn" onclick="closeSidebar()" title="Close">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
 
     <div class="sidebar-section">
-      <h2>Patient Profile</h2>
+      <h2 data-i18n="patientProfile">Patient Profile</h2>
 
       <div class="form-group">
-        <label><i class="fas fa-user"></i>Age</label>
+        <label><i class="fas fa-user"></i><span data-i18n="age">Age</span></label>
         <input type="number" id="age" placeholder="e.g. 28" min="1" max="120" />
       </div>
 
       <div class="form-group">
-        <label><i class="fas fa-venus-mars"></i>Gender</label>
+        <label><i class="fas fa-venus-mars"></i><span data-i18n="gender">Gender</span></label>
         <select id="gender">
           <option value="">Select gender</option>
           <option>Male</option>
@@ -697,28 +783,28 @@
       </div>
 
       <div class="form-group">
-        <label><i class="fas fa-weight"></i>Weight (kg)</label>
+        <label><i class="fas fa-weight"></i><span data-i18n="weight">Weight (kg)</span></label>
         <input type="number" id="weight" placeholder="e.g. 70" />
       </div>
 
       <div class="form-group">
-        <label><i class="fas fa-file-medical"></i>Existing Conditions</label>
+        <label><i class="fas fa-file-medical"></i><span data-i18n="existingConditions">Existing Conditions</span></label>
         <textarea id="existing_conditions" rows="2" placeholder="e.g. Diabetes, Hypertension..."></textarea>
       </div>
 
       <div class="form-group">
-        <label><i class="fas fa-pills"></i>Current Medications</label>
+        <label><i class="fas fa-pills"></i><span data-i18n="medications">Current Medications</span></label>
         <textarea id="medications" rows="2" placeholder="e.g. Metformin 500mg..."></textarea>
       </div>
 
       <div class="form-group">
-        <label><i class="fas fa-allergies"></i>Allergies</label>
+        <label><i class="fas fa-allergies"></i><span data-i18n="allergies">Allergies</span></label>
         <input type="text" id="allergies" placeholder="e.g. Penicillin, Peanuts..." />
       </div>
     </div>
 
     <div class="sidebar-section">
-      <h2>Quick Symptoms</h2>
+      <h2 data-i18n="quickSymptoms">Quick Symptoms</h2>
       <div class="quick-symptoms" id="quick-symptoms">
         <span class="quick-chip" onclick="toggleChip(this)">🤒 Fever</span>
         <span class="quick-chip" onclick="toggleChip(this)">🤧 Runny nose</span>
@@ -740,7 +826,7 @@
     </div>
 
     <div class="sidebar-section" style="margin-bottom: 16px;">
-      <h2>Symptom Severity</h2>
+      <h2 data-i18n="symptomSeverity">Symptom Severity</h2>
       <div class="severity-badge">
         <div class="sev-btn" onclick="setSeverity(this, 'mild')">🟢 Mild</div>
         <div class="sev-btn" onclick="setSeverity(this, 'moderate')">🟡 Moderate</div>
@@ -748,11 +834,11 @@
       </div>
     </div>
 
-    <button class="new-chat-btn" onclick="newChat()">
+    <button class="new-chat-btn" onclick="newChat()" data-i18n="newConsultation">
       <i class="fas fa-plus" style="margin-right:8px"></i>New Consultation
     </button>
 
-    <div class="disclaimer-box">
+    <div class="disclaimer-box" data-i18n="disclaimer">
       <i class="fas fa-shield-alt"></i>HealthAI provides informational guidance only. Always consult a qualified physician for medical decisions.
     </div>
   </div>
@@ -763,38 +849,50 @@
       <div style="display:flex;align-items:center;gap:12px">
         <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
         <div class="topbar-left">
-          <h2>Medical Consultation</h2>
-          <p>Powered by Groq LLaMA 3 · 70B</p>
+          <h2 data-i18n="consultation">Medical Consultation</h2>
+          <p data-i18n="powered">Powered by Groq LLaMA 3 · 70B</p>
         </div>
       </div>
-      <div class="status-dot">AI Online</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button id="theme-toggle" onclick="toggleTheme()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 10px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s" title="Toggle theme">
+          <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+        <select id="language-selector" onchange="changeLanguage(this.value)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">
+          <option value="en">🇺🇸 English</option>
+          <option value="hi">🇮🇳 हिंदी</option>
+          <option value="es">🇪🇸 Español</option>
+          <option value="fr">🇫🇷 Français</option>
+          <option value="de">🇩🇪 Deutsch</option>
+        </select>
+        <div class="status-dot" data-i18n="aiOnline">AI Online</div>
+      </div>
     </div>
 
     <div id="messages">
       <div class="welcome" id="welcome">
         <div class="welcome-icon">⚕️</div>
-        <h2>Hello, I'm HealthAI</h2>
-        <p>Fill in your patient profile on the left, then describe your symptoms. I'll analyze them and suggest possible conditions with severity assessment.</p>
+        <h2 data-i18n="hello">Hello, I'm HealthAI</h2>
+        <p data-i18n="welcomeText">Fill in your patient profile on the left, then describe your symptoms. I'll analyze them and suggest possible conditions with severity assessment.</p>
         <div class="welcome-cards">
           <div class="welcome-card" onclick="sendQuick('I have a severe headache, fever of 102°F, and stiff neck for 2 days. What could it be?')">
             <div class="card-icon">🤕</div>
-            <h3>Symptom Analysis</h3>
-            <p>Describe symptoms for a detailed diagnosis assessment</p>
+            <h3 data-i18n="symptomAnalysis">Symptom Analysis</h3>
+            <p data-i18n="symptomAnalysisDesc">Describe symptoms for a detailed diagnosis assessment</p>
           </div>
           <div class="welcome-card" onclick="sendQuick('I have chest pain radiating to my left arm and jaw, with sweating. What should I do?')">
             <div class="card-icon">🫀</div>
-            <h3>Emergency Check</h3>
-            <p>Evaluate if symptoms require immediate attention</p>
+            <h3 data-i18n="emergencyCheck">Emergency Check</h3>
+            <p data-i18n="emergencyCheckDesc">Evaluate if symptoms require immediate attention</p>
           </div>
           <div class="welcome-card" onclick="sendQuick('I have been experiencing fatigue, weight gain, cold intolerance and dry skin for 3 months.')">
             <div class="card-icon">🔬</div>
-            <h3>Chronic Symptoms</h3>
-            <p>Analyze long-term or recurring health issues</p>
+            <h3 data-i18n="chronicSymptoms">Chronic Symptoms</h3>
+            <p data-i18n="chronicSymptomsDesc">Analyze long-term or recurring health issues</p>
           </div>
           <div class="welcome-card" onclick="sendQuick('What are the warning signs of a heart attack I should know about?')">
             <div class="card-icon">📚</div>
-            <h3>Health Education</h3>
-            <p>Learn about conditions, prevention and when to seek help</p>
+            <h3 data-i18n="healthEducation">Health Education</h3>
+            <p data-i18n="healthEducationDesc">Learn about conditions, prevention and when to seek help</p>
           </div>
         </div>
       </div>
@@ -804,10 +902,10 @@
       <div class="emergency-banner" id="emergency-banner">
         <i class="fas fa-exclamation-triangle"></i>
         <div class="em-text">
-          <h3>Emergency Detected</h3>
-          <p>Your symptoms may require immediate medical attention</p>
+          <h3 data-i18n="emergencyDetected">Emergency Detected</h3>
+          <p data-i18n="emergencyMessage">Your symptoms may require immediate medical attention</p>
         </div>
-        <button class="em-call-btn" onclick="callEmergency()">📞 Call 102</button>
+        <button class="em-call-btn" onclick="callEmergency()" data-i18n="callEmergency">📞 Call 102</button>
       </div>
       <div class="input-wrapper">
         <textarea id="user-input" rows="1" placeholder="Describe your symptoms, duration, severity… (e.g. 'I've had a fever of 101°F and sore throat for 3 days')" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
@@ -826,15 +924,425 @@
 </div>
 
 <script>
+// ── TRANSLATION SYSTEM ──
+const translations = {
+  en: {
+    patientProfile: "Patient Profile",
+    age: "Age",
+    gender: "Gender",
+    selectGender: "Select gender",
+    weight: "Weight (kg)",
+    existingConditions: "Existing Conditions",
+    existingConditionsPlaceholder: "e.g. Diabetes, Hypertension...",
+    medications: "Current Medications",
+    medicationsPlaceholder: "e.g. Metformin 500mg...",
+    allergies: "Allergies",
+    allergiesPlaceholder: "e.g. Penicillin, Peanuts...",
+    quickSymptoms: "Quick Symptoms",
+    symptomSeverity: "Symptom Severity",
+    mild: "🟢 Mild",
+    moderate: "🟡 Moderate",
+    severe: "🔴 Severe",
+    newConsultation: "+ New Consultation",
+    disclaimer: "HealthAI provides informational guidance only. Always consult a qualified physician for medical decisions.",
+    consultation: "Medical Consultation",
+    powered: "Powered by Groq LLaMA 3 · 70B",
+    aiOnline: "AI Online",
+    hello: "Hello, I'm HealthAI",
+    welcomeText: "Fill in your patient profile on the left, then describe your symptoms. I'll analyze them and suggest possible conditions with severity assessment.",
+    symptomAnalysis: "Symptom Analysis",
+    symptomAnalysisDesc: "Describe symptoms for a detailed diagnosis assessment",
+    emergencyCheck: "Emergency Check",
+    emergencyCheckDesc: "Evaluate if symptoms require immediate attention",
+    chronicSymptoms: "Chronic Symptoms",
+    chronicSymptomsDesc: "Analyze long-term or recurring health issues",
+    healthEducation: "Health Education",
+    healthEducationDesc: "Learn about conditions, prevention and when to seek help",
+    emergencyDetected: "Emergency Detected",
+    emergencyMessage: "Your symptoms may require immediate medical attention",
+    callEmergency: "📞 Call 102",
+    symptomPlaceholder: "Describe your symptoms, duration, severity… (e.g. 'I've had a fever of 101°F and sore throat for 3 days')",
+    inputHint: "Press Enter to send · Shift+Enter for new line · Not a substitute for professional medical advice",
+    errorMessage: "⚠️ Error connecting to the AI. Please check your API key and try again.",
+    you: "You",
+    healthAI: "HealthAI",
+    fever: "🤒 Fever",
+    runnyNose: "🤧 Runny nose",
+    cough: "😮‍💨 Cough",
+    headache: "🤕 Headache",
+    shortnessOfBreath: "😮‍💨 Shortness of breath",
+    nausea: "🤢 Nausea",
+    fatigue: "😫 Fatigue",
+    chestPain: "🫀 Chest pain",
+    musclePain: "🤸 Muscle pain",
+    dizziness: "😵 Dizziness",
+    soreThroat: "🦠 Sore throat",
+    vomiting: "🤮 Vomiting",
+    diarrhoea: "💩 Diarrhoea",
+    eyeIrritation: "👁️ Eye irritation",
+    jointPain: "🦵 Joint pain",
+    chills: "🌡️ Chills",
+    speak: "🔊 Speak",
+    stop: "⏹ Stop",
+    speaking: "🔊 Speaking...",
+    copy: "📋 Copy",
+  },
+  hi: {
+    patientProfile: "रोगी प्रोफाइल",
+    age: "उम्र",
+    gender: "लिंग",
+    selectGender: "लिंग चुनें",
+    weight: "वजन (किग्रा)",
+    existingConditions: "मौजूदा स्थितियां",
+    existingConditionsPlaceholder: "उदा. मधुमेह, उच्च रक्तचाप...",
+    medications: "वर्तमान दवाएं",
+    medicationsPlaceholder: "उदा. मेटफॉर्मिन 500mg...",
+    allergies: "एलर्जी",
+    allergiesPlaceholder: "उदा. पेनिसिलिन, मूंगफली...",
+    quickSymptoms: "त्वरित लक्षण",
+    symptomSeverity: "लक्षण की गंभीरता",
+    mild: "🟢 हल्का",
+    moderate: "🟡 मध्यम",
+    severe: "🔴 गंभीर",
+    newConsultation: "+ नया परामर्श",
+    disclaimer: "HealthAI केवल सूचनात्मक मार्गदर्शन प्रदान करता है। चिकित्सा निर्णयों के लिए हमेशा एक योग्य चिकित्सक से परामर्श लें।",
+    consultation: "चिकित्सा परामर्श",
+    powered: "Groq LLaMA 3 · 70B द्वारा संचालित",
+    aiOnline: "AI ऑनलाइन",
+    hello: "नमस्ते, मैं HealthAI हूं",
+    welcomeText: "बाईं ओर अपनी रोगी प्रोफाइल भरें, फिर अपने लक्षणों का वर्णन करें। मैं उनका विश्लेषण करूंगा और संभावित स्थितियों का सुझाव दूंगा।",
+    symptomAnalysis: "लक्षण विश्लेषण",
+    symptomAnalysisDesc: "विस्तृत निदान मूल्यांकन के लिए लक्षणों का वर्णन करें",
+    emergencyCheck: "आपातकालीन जांच",
+    emergencyCheckDesc: "मूल्यांकन करें कि लक्षणों को तत्काल ध्यान की आवश्यकता है या नहीं",
+    chronicSymptoms: "पुरानी स्थितियां",
+    chronicSymptomsDesc: "दीर्घकालीन या बार-बार होने वाली स्वास्थ्य समस्याओं का विश्लेषण करें",
+    healthEducation: "स्वास्थ्य शिक्षा",
+    healthEducationDesc: "स्थितियों, रोकथाम और कब सहायता लेनी है यह जानें",
+    emergencyDetected: "आपातकाल का पता चला",
+    emergencyMessage: "आपके लक्षणों को तत्काल चिकित्सा ध्यान की आवश्यकता हो सकती है",
+    callEmergency: "📞 102 पर कॉल करें",
+    symptomPlaceholder: "अपने लक्षणों, अवधि, गंभीरता का वर्णन करें... (उदा. 'मुझे 3 दिन से 101°F बुखार और गले में खराश है')",
+    inputHint: "भेजने के लिए Enter दबाएं · नई पंक्ति के लिए Shift+Enter · पेशेवर चिकित्सा सलाह का विकल्प नहीं है",
+    errorMessage: "⚠️ AI से जुड़ने में त्रुटि। कृपया अपनी API कुंजी जांचें और पुनः प्रयास करें।",
+    you: "आप",
+    healthAI: "HealthAI",
+    fever: "🤒 बुखार",
+    runnyNose: "🤧 बहती नाक",
+    cough: "😮‍💨 खांसी",
+    headache: "🤕 सिरदर्द",
+    shortnessOfBreath: "😮‍💨 सांस लेने में कठिनाई",
+    nausea: "🤢 मतली",
+    fatigue: "😫 थकान",
+    chestPain: "🫀 सीने में दर्द",
+    musclePain: "🤸 मांसपेशियों में दर्द",
+    dizziness: "😵 चक्कर आना",
+    soreThroat: "🦠 गले में खराश",
+    vomiting: "🤮 उल्टी",
+    diarrhoea: "💩 दस्त",
+    eyeIrritation: "👁️ आंखों में जलन",
+    jointPain: "🦵 जोड़ों में दर्द",
+    chills: "🌡️ ठंड लगना",
+    speak: "🔊 सुनें",
+    stop: "⏹ रुकें",
+    speaking: "🔊 बोल रहे हैं...",
+    copy: "📋 कॉपी करें",
+  },
+  es: {
+    patientProfile: "Perfil del Paciente",
+    age: "Edad",
+    gender: "Género",
+    selectGender: "Seleccionar género",
+    weight: "Peso (kg)",
+    existingConditions: "Condiciones Existentes",
+    existingConditionsPlaceholder: "p. ej. Diabetes, Hipertensión...",
+    medications: "Medicamentos Actuales",
+    medicationsPlaceholder: "p. ej. Metformina 500mg...",
+    allergies: "Alergias",
+    allergiesPlaceholder: "p. ej. Penicilina, Maní...",
+    quickSymptoms: "Síntomas Rápidos",
+    symptomSeverity: "Gravedad del Síntoma",
+    mild: "🟢 Leve",
+    moderate: "🟡 Moderado",
+    severe: "🔴 Grave",
+    newConsultation: "+ Nueva Consulta",
+    disclaimer: "HealthAI proporciona solo orientación informativa. Siempre consulte con un médico calificado para decisiones médicas.",
+    consultation: "Consulta Médica",
+    powered: "Impulsado por Groq LLaMA 3 · 70B",
+    aiOnline: "IA en Línea",
+    hello: "Hola, soy HealthAI",
+    welcomeText: "Complete su perfil de paciente a la izquierda, luego describa sus síntomas. Los analizaré y sugeriré condiciones posibles.",
+    symptomAnalysis: "Análisis de Síntomas",
+    symptomAnalysisDesc: "Describa síntomas para una evaluación de diagnóstico detallada",
+    emergencyCheck: "Verificación de Emergencia",
+    emergencyCheckDesc: "Evalúe si los síntomas requieren atención inmediata",
+    chronicSymptoms: "Síntomas Crónicos",
+    chronicSymptomsDesc: "Analizar problemas de salud a largo plazo o recurrentes",
+    healthEducation: "Educación para la Salud",
+    healthEducationDesc: "Aprenda sobre condiciones, prevención y cuándo buscar ayuda",
+    emergencyDetected: "Emergencia Detectada",
+    emergencyMessage: "Sus síntomas pueden requerir atención médica inmediata",
+    callEmergency: "📞 Llamar 102",
+    symptomPlaceholder: "Describa sus síntomas, duración, gravedad... (p. ej. 'He tenido fiebre de 101°F y dolor de garganta durante 3 días')",
+    inputHint: "Presione Enter para enviar · Shift+Enter para nueva línea · No es un sustituto del consejo médico profesional",
+    errorMessage: "⚠️ Error al conectar con la IA. Por favor, verifique su clave API e intente de nuevo.",
+    you: "Usted",
+    healthAI: "HealthAI",
+    fever: "🤒 Fiebre",
+    runnyNose: "🤧 Nariz que moquea",
+    cough: "😮‍💨 Tos",
+    headache: "🤕 Dolor de cabeza",
+    shortnessOfBreath: "😮‍💨 Falta de aliento",
+    nausea: "🤢 Náusea",
+    fatigue: "😫 Fatiga",
+    chestPain: "🫀 Dolor de pecho",
+    musclePain: "🤸 Dolor muscular",
+    dizziness: "😵 Mareo",
+    soreThroat: "🦠 Dolor de garganta",
+    vomiting: "🤮 Vómito",
+    diarrhoea: "💩 Diarrea",
+    eyeIrritation: "👁️ Irritación ocular",
+    jointPain: "🦵 Dolor articular",
+    chills: "🌡️ Escalofríos",
+    speak: "🔊 Hablar",
+    stop: "⏹ Detener",
+    speaking: "🔊 Hablando...",
+    copy: "📋 Copiar",
+  },
+  fr: {
+    patientProfile: "Profil du Patient",
+    age: "Âge",
+    gender: "Genre",
+    selectGender: "Sélectionner le genre",
+    weight: "Poids (kg)",
+    existingConditions: "Conditions Existantes",
+    existingConditionsPlaceholder: "p. ex. Diabète, Hypertension...",
+    medications: "Médicaments Actuels",
+    medicationsPlaceholder: "p. ex. Metformine 500mg...",
+    allergies: "Allergies",
+    allergiesPlaceholder: "p. ex. Pénicilline, Arachides...",
+    quickSymptoms: "Symptômes Rapides",
+    symptomSeverity: "Gravité des Symptômes",
+    mild: "🟢 Léger",
+    moderate: "🟡 Modéré",
+    severe: "🔴 Grave",
+    newConsultation: "+ Nouvelle Consultation",
+    disclaimer: "HealthAI fournit uniquement des conseils informatifs. Consultez toujours un médecin qualifié pour les décisions médicales.",
+    consultation: "Consultation Médicale",
+    powered: "Alimenté par Groq LLaMA 3 · 70B",
+    aiOnline: "IA En Ligne",
+    hello: "Bonjour, je suis HealthAI",
+    welcomeText: "Remplissez votre profil patient à gauche, puis décrivez vos symptômes. Je les analyserai et suggérerai les conditions possibles.",
+    symptomAnalysis: "Analyse des Symptômes",
+    symptomAnalysisDesc: "Décrivez les symptômes pour une évaluation diagnostique détaillée",
+    emergencyCheck: "Vérification d'Urgence",
+    emergencyCheckDesc: "Évaluer si les symptômes nécessitent une attention immédiate",
+    chronicSymptoms: "Symptômes Chroniques",
+    chronicSymptomsDesc: "Analyser les problèmes de santé à long terme ou récurrents",
+    healthEducation: "Éducation Sanitaire",
+    healthEducationDesc: "Apprenez les conditions, la prévention et quand chercher de l'aide",
+    emergencyDetected: "Urgence Détectée",
+    emergencyMessage: "Vos symptômes peuvent nécessiter une attention médicale immédiate",
+    callEmergency: "📞 Appeler 102",
+    symptomPlaceholder: "Décrivez vos symptômes, leur durée, leur gravité... (p. ex. 'J'ai eu une fièvre de 101°F et une gorge irritée pendant 3 jours')",
+    inputHint: "Appuyez sur Entrée pour envoyer · Maj+Entrée pour nouvelle ligne · Ne remplace pas un conseil médical professionnel",
+    errorMessage: "⚠️ Erreur de connexion à l'IA. Veuillez vérifier votre clé API et réessayer.",
+    you: "Vous",
+    healthAI: "HealthAI",
+    fever: "🤒 Fièvre",
+    runnyNose: "🤧 Nez qui coule",
+    cough: "😮‍💨 Toux",
+    headache: "🤕 Mal de tête",
+    shortnessOfBreath: "😮‍💨 Essoufflement",
+    nausea: "🤢 Nausée",
+    fatigue: "😫 Fatigue",
+    chestPain: "🫀 Douleur thoracique",
+    musclePain: "🤸 Douleur musculaire",
+    dizziness: "😵 Vertige",
+    soreThroat: "🦠 Mal de gorge",
+    vomiting: "🤮 Vomissement",
+    diarrhoea: "💩 Diarrhée",
+    eyeIrritation: "👁️ Irritation oculaire",
+    jointPain: "🦵 Douleur articulaire",
+    chills: "🌡️ Frissons",
+    speak: "🔊 Écouter",
+    stop: "⏹ Arrêter",
+    speaking: "🔊 Écoute...",
+    copy: "📋 Copier",
+  },
+  de: {
+    patientProfile: "Patientenprofil",
+    age: "Alter",
+    gender: "Geschlecht",
+    selectGender: "Geschlecht wählen",
+    weight: "Gewicht (kg)",
+    existingConditions: "Bestehende Bedingungen",
+    existingConditionsPlaceholder: "z. B. Diabetes, Bluthochdruck...",
+    medications: "Aktuelle Medikamente",
+    medicationsPlaceholder: "z. B. Metformin 500mg...",
+    allergies: "Allergien",
+    allergiesPlaceholder: "z. B. Penicillin, Erdnüsse...",
+    quickSymptoms: "Schnelle Symptome",
+    symptomSeverity: "Symptomstärke",
+    mild: "🟢 Leicht",
+    moderate: "🟡 Moderat",
+    severe: "🔴 Schwerwiegend",
+    newConsultation: "+ Neue Beratung",
+    disclaimer: "HealthAI bietet nur Informationen. Konsultieren Sie immer einen qualifizierten Arzt für medizinische Entscheidungen.",
+    consultation: "Medizinische Beratung",
+    powered: "Angetrieben von Groq LLaMA 3 · 70B",
+    aiOnline: "KI Online",
+    hello: "Hallo, ich bin HealthAI",
+    welcomeText: "Füllen Sie Ihr Patientenprofil auf der linken Seite aus und beschreiben Sie dann Ihre Symptome. Ich werde sie analysieren und mögliche Zustände vorschlagen.",
+    symptomAnalysis: "Symptomanalyse",
+    symptomAnalysisDesc: "Beschreiben Sie Symptome für eine detaillierte Diagnosebeurteilung",
+    emergencyCheck: "Notfallprüfung",
+    emergencyCheckDesc: "Prüfen Sie, ob die Symptome sofortige Aufmerksamkeit erfordern",
+    chronicSymptoms: "Chronische Symptome",
+    chronicSymptomsDesc: "Analysieren Sie langfristige oder wiederkehrende Gesundheitsprobleme",
+    healthEducation: "Gesundheitserziehung",
+    healthEducationDesc: "Erfahren Sie mehr über Bedingungen, Prävention und wann Sie Hilfe suchen sollten",
+    emergencyDetected: "Notfall erkannt",
+    emergencyMessage: "Ihre Symptome erfordern möglicherweise sofortige ärztliche Aufmerksamkeit",
+    callEmergency: "📞 102 anrufen",
+    symptomPlaceholder: "Beschreiben Sie Ihre Symptome, Dauer, Schweregrad... (z. B. 'Ich habe seit 3 Tagen Fieber von 101°F und Halsschmerzen')",
+    inputHint: "Drücken Sie Enter zum Absenden · Shift+Enter für neue Zeile · Kein Ersatz für professionelle medizinische Beratung",
+    errorMessage: "⚠️ Fehler beim Verbinden mit der KI. Bitte überprüfen Sie Ihren API-Schlüssel und versuchen Sie es erneut.",
+    you: "Sie",
+    healthAI: "HealthAI",
+    fever: "🤒 Fieber",
+    runnyNose: "🤧 Laufende Nase",
+    cough: "😮‍💨 Husten",
+    headache: "🤕 Kopfschmerzen",
+    shortnessOfBreath: "😮‍💨 Kurzatmigkeit",
+    nausea: "🤢 Übelkeit",
+    fatigue: "😫 Müdigkeit",
+    chestPain: "🫀 Brustschmerz",
+    musclePain: "🤸 Muskelschmerz",
+    dizziness: "😵 Schwindel",
+    soreThroat: "🦠 Halsschmerzen",
+    vomiting: "🤮 Erbrechen",
+    diarrhoea: "💩 Durchfall",
+    eyeIrritation: "👁️ Augenreizung",
+    jointPain: "🦵 Gelenkschmerzen",
+    chills: "🌡️ Schüttelfrost",
+    speak: "🔊 Sprechen",
+    stop: "⏹ Stopp",
+    speaking: "🔊 Sprechen...",
+    copy: "📋 Kopieren",
+  }
+};
+
+let currentLanguage = localStorage.getItem('healthai_language') || 'en';
+let currentTheme = localStorage.getItem('healthai_theme') || 'dark';
 let conversationHistory = [];
 let selectedSeverity = '';
 let isRecording = false;
 let recognition = null;
 let currentSeverityClass = '';
 
+// ── THEME SYSTEM ──
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+  localStorage.setItem('healthai_theme', currentTheme);
+}
+
+function applyTheme() {
+  const html = document.documentElement;
+  const icon = document.getElementById('theme-icon');
+  
+  if (currentTheme === 'light') {
+    html.setAttribute('data-theme', 'light');
+    icon.className = 'fas fa-sun';
+  } else {
+    html.removeAttribute('data-theme');
+    icon.className = 'fas fa-moon';
+  }
+}
+
+// Initialize theme on page load
+window.addEventListener('DOMContentLoaded', function() {
+  applyTheme();
+});
+
+// ── LANGUAGE SYSTEM ──
+function t(key) {
+  return translations[currentLanguage][key] || translations['en'][key] || key;
+}
+
+function changeLanguage(lang) {
+  currentLanguage = lang;
+  localStorage.setItem('healthai_language', lang);
+  document.getElementById('language-selector').value = lang;
+  updatePageLanguage();
+}
+
+function updatePageLanguage() {
+  // Update all elements with data-i18n attribute
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
+  });
+
+  // Update placeholders
+  document.getElementById('age').placeholder = t('age');
+  document.getElementById('weight').placeholder = t('weight');
+  document.getElementById('existing_conditions').placeholder = t('existingConditionsPlaceholder');
+  document.getElementById('medications').placeholder = t('medicationsPlaceholder');
+  document.getElementById('allergies').placeholder = t('allergiesPlaceholder');
+  document.getElementById('user-input').placeholder = t('symptomPlaceholder');
+  document.getElementById('gender').querySelector('[value=""]').textContent = t('selectGender');
+
+  // Update quick symptoms
+  const symptoms = ['fever', 'runnyNose', 'cough', 'headache', 'shortnessOfBreath', 'nausea', 'fatigue', 'chestPain', 'musclePain', 'dizziness', 'soreThroat', 'vomiting', 'diarrhoea', 'eyeIrritation', 'jointPain', 'chills'];
+  const chips = document.querySelectorAll('.quick-chip');
+  chips.forEach((chip, idx) => {
+    if (idx < symptoms.length) {
+      chip.textContent = t(symptoms[idx]);
+    }
+  });
+
+  // Update severity buttons
+  document.querySelectorAll('.sev-btn').forEach((btn, idx) => {
+    const severities = ['mild', 'moderate', 'severe'];
+    btn.textContent = t(severities[idx]);
+  });
+
+  // Update input hint
+  const inputHint = document.querySelector('.input-hint');
+  if (inputHint) {
+    inputHint.innerHTML = t('inputHint').replace('Press', '<kbd style="background:var(--surface2);padding:1px 5px;border-radius:4px;border:1px solid var(--border);font-size:10px">Enter</kbd> ' ).replace('Shift+Enter', '<kbd style="background:var(--surface2);padding:1px 5px;border-radius:4px;border:1px solid var(--border);font-size:10px">Shift+Enter</kbd>') + ' · Not a substitute for professional medical advice';
+  }
+}
+
+// Initialize language on page load
+window.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('language-selector').value = currentLanguage;
+  updatePageLanguage();
+  applyTheme();
+});
+
 // ── Sidebar ──
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  sidebar.classList.toggle('open');
+  backdrop.classList.toggle('open');
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('open');
+}
+
+// Close sidebar when clicking form elements on mobile
+function closeSidebarOnMobile() {
+  if (window.innerWidth <= 768) {
+    closeSidebar();
+  }
 }
 
 // ── Severity ──
@@ -844,11 +1352,13 @@ function setSeverity(btn, level) {
   });
   selectedSeverity = level;
   btn.classList.add('active-' + level);
+  closeSidebarOnMobile();
 }
 
 // ── Quick chips ──
 function toggleChip(el) {
   el.classList.toggle('selected');
+  closeSidebarOnMobile();
 }
 
 function getSelectedChips() {
@@ -921,16 +1431,55 @@ function addMessage(role, content = '') {
   const container = document.getElementById('messages');
   const div = document.createElement('div');
   div.className = 'msg ' + role;
-  div.innerHTML = `
-    <div class="msg-avatar">${role === 'user' ? '👤' : '⚕'}</div>
-    <div class="msg-body">
-      <div class="msg-name">${role === 'user' ? 'You' : 'HealthAI'}</div>
-      <div class="msg-bubble">${role === 'ai' && !content ? '<div class="typing-indicator"><span></span><span></span><span></span></div>' : formatMessage(content)}</div>
-    </div>
-  `;
+  const roleName = role === 'user' ? t('you') : t('healthAI');
+  
+  // Create the message element
+  const msgBody = document.createElement('div');
+  msgBody.className = 'msg-body';
+  
+  const msgName = document.createElement('div');
+  msgName.className = 'msg-name';
+  msgName.textContent = roleName;
+  
+  const msgBubble = document.createElement('div');
+  msgBubble.className = 'msg-bubble';
+  msgBubble.innerHTML = role === 'ai' && !content ? '<div class="typing-indicator"><span></span><span></span><span></span></div>' : formatMessage(content);
+  
+  msgBody.appendChild(msgName);
+  msgBody.appendChild(msgBubble);
+  
+  // Add TTS button for AI messages with content
+  if (role === 'ai' && content) {
+    const msgControls = document.createElement('div');
+    msgControls.className = 'msg-controls';
+    msgControls.innerHTML = `<button class="tts-btn" onclick="speakMessage(this)" data-text="${escapeHtml(content)}">
+      <i class="fas fa-volume-up"></i> <span>${t('speak')}</span>
+    </button>`;
+    msgBody.appendChild(msgControls);
+  }
+  
+  // Create avatar
+  const msgAvatar = document.createElement('div');
+  msgAvatar.className = 'msg-avatar';
+  msgAvatar.textContent = role === 'user' ? '👤' : '⚕';
+  
+  div.appendChild(msgAvatar);
+  div.appendChild(msgBody);
+  
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
-  return div.querySelector('.msg-bubble');
+  return msgBubble;
+}
+
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
 }
 
 function formatMessage(text) {
@@ -977,6 +1526,7 @@ async function sendMessage() {
 
   addMessage('user', text);
   conversationHistory.push({ role: 'user', content: text });
+  closeSidebarOnMobile();
 
   const sendBtn = document.getElementById('send-btn');
   sendBtn.disabled = true;
@@ -1012,6 +1562,20 @@ async function sendMessage() {
 
     fullResponse = data.content || '';
     aiBubble.innerHTML = formatMessage(fullResponse);
+    
+    // Add TTS button after response is received
+    if (fullResponse) {
+      const msgBody = aiBubble.parentElement;
+      const existingControls = msgBody.querySelector('.msg-controls');
+      if (!existingControls) {
+        const msgControls = document.createElement('div');
+        msgControls.className = 'msg-controls';
+        msgControls.innerHTML = `<button class="tts-btn" onclick="speakMessage(this)" data-text="${escapeHtml(fullResponse)}">
+          <i class="fas fa-volume-up"></i> <span>${t('speak')}</span>
+        </button>`;
+        msgBody.appendChild(msgControls);
+      }
+    }
 
     conversationHistory.push({ role: 'assistant', content: fullResponse });
 
@@ -1021,7 +1585,7 @@ async function sendMessage() {
     }
 
   } catch (err) {
-    aiBubble.innerHTML = `<span style="color:var(--red)">⚠️ Error connecting to the AI. Please check your API key and try again.<br><small>${err.message}</small></span>`;
+    aiBubble.innerHTML = `<span style="color:var(--red)">${t('errorMessage')}<br><small>${err.message}</small></span>`;
   }
 
   sendBtn.disabled = false;
@@ -1037,20 +1601,20 @@ function newChat() {
   document.getElementById('messages').innerHTML = `
     <div class="welcome" id="welcome">
       <div class="welcome-icon">⚕️</div>
-      <h2>Hello, I'm HealthAI</h2>
-      <p>Fill in your patient profile on the left, then describe your symptoms. I'll analyze them and suggest possible conditions with severity assessment.</p>
+      <h2 data-i18n="hello">${t('hello')}</h2>
+      <p data-i18n="welcomeText">${t('welcomeText')}</p>
       <div class="welcome-cards">
         <div class="welcome-card" onclick="sendQuick('I have a severe headache, fever of 102°F, and stiff neck for 2 days. What could it be?')">
-          <div class="card-icon">🤕</div><h3>Symptom Analysis</h3><p>Describe symptoms for a detailed diagnosis assessment</p>
+          <div class="card-icon">🤕</div><h3 data-i18n="symptomAnalysis">${t('symptomAnalysis')}</h3><p data-i18n="symptomAnalysisDesc">${t('symptomAnalysisDesc')}</p>
         </div>
         <div class="welcome-card" onclick="sendQuick('I have chest pain radiating to my left arm and jaw, with sweating. What should I do?')">
-          <div class="card-icon">🫀</div><h3>Emergency Check</h3><p>Evaluate if symptoms require immediate attention</p>
+          <div class="card-icon">🫀</div><h3 data-i18n="emergencyCheck">${t('emergencyCheck')}</h3><p data-i18n="emergencyCheckDesc">${t('emergencyCheckDesc')}</p>
         </div>
         <div class="welcome-card" onclick="sendQuick('I have been experiencing fatigue, weight gain, cold intolerance and dry skin for 3 months.')">
-          <div class="card-icon">🔬</div><h3>Chronic Symptoms</h3><p>Analyze long-term or recurring health issues</p>
+          <div class="card-icon">🔬</div><h3 data-i18n="chronicSymptoms">${t('chronicSymptoms')}</h3><p data-i18n="chronicSymptomsDesc">${t('chronicSymptomsDesc')}</p>
         </div>
         <div class="welcome-card" onclick="sendQuick('What are the warning signs of a heart attack I should know about?')">
-          <div class="card-icon">📚</div><h3>Health Education</h3><p>Learn about conditions, prevention and when to seek help</p>
+          <div class="card-icon">📚</div><h3 data-i18n="healthEducation">${t('healthEducation')}</h3><p data-i18n="healthEducationDesc">${t('healthEducationDesc')}</p>
         </div>
       </div>
     </div>`;
@@ -1066,6 +1630,148 @@ function callEmergency() {
     window.location.href = 'tel:102';
   }
 }
+
+// ── Text-to-Speech ──
+let currentUtterance = null;
+
+function getAvailableVoice(lang) {
+  // Get all available voices
+  let voices = window.speechSynthesis.getVoices();
+  
+  // If no voices loaded yet, try to load them
+  if (voices.length === 0) {
+    // Request voices to be loaded
+    window.speechSynthesis.onvoiceschanged = () => {
+      voices = window.speechSynthesis.getVoices();
+    };
+  }
+  
+  // Log available voices for debugging
+  console.log('Available voices:', voices.length);
+  voices.forEach((v, i) => {
+    console.log(`Voice ${i}: ${v.name} (${v.lang})`);
+  });
+  
+  // Language mappings with multiple possible codes
+  const langMap = {
+    'en': ['en', 'en-US', 'en-GB', 'English'],
+    'hi': ['hi', 'hi-IN', 'Hindi'],
+    'es': ['es', 'es-ES', 'es-MX', 'Spanish'],
+    'fr': ['fr', 'fr-FR', 'French'],
+    'de': ['de', 'de-DE', 'German']
+  };
+  
+  const langCodes = langMap[lang] || ['en'];
+  console.log(`Looking for ${lang} using codes:`, langCodes);
+  
+  // Try exact matches first
+  for (let code of langCodes) {
+    const voice = voices.find(v => {
+      const voiceLang = (v.lang || '').toLowerCase();
+      const checkCode = code.toLowerCase();
+      const langMatch = voiceLang === checkCode || voiceLang.startsWith(checkCode);
+      const nameMatch = v.name.toLowerCase().includes(checkCode);
+      return langMatch || nameMatch;
+    });
+    if (voice) {
+      console.log(`Found voice for ${lang}: ${voice.name} (${voice.lang})`);
+      return voice;
+    }
+  }
+  
+  // Fallback to any voice if specific language not found
+  console.warn(`No ${lang} voice found, using default`);
+  return voices.find(v => v.default) || voices[0] || null;
+}
+
+function speakMessage(btn) {
+  // Get text from data attribute
+  const text = btn.getAttribute('data-text');
+  
+  console.log('Speak clicked - Current language:', currentLanguage);
+  
+  // Stop current speech if any
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    currentUtterance = null;
+    btn.classList.remove('playing');
+    btn.querySelector('span').textContent = t('speak');
+    return;
+  }
+
+  // Clean text: remove HTML tags and extra whitespace
+  const cleanText = text
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&#039;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // Create speech utterance
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+  
+  // Get language code for speech synthesis
+  const langMap = {
+    'en': 'en-US',
+    'hi': 'hi-IN',
+    'es': 'es-ES',
+    'fr': 'fr-FR',
+    'de': 'de-DE'
+  };
+  
+  // Set language
+  const selectedLang = langMap[currentLanguage] || 'en-US';
+  utterance.lang = selectedLang;
+  
+  console.log('Setting utterance lang to:', selectedLang);
+  
+  // Try to set the specific voice
+  const voice = getAvailableVoice(currentLanguage);
+  if (voice) {
+    utterance.voice = voice;
+    console.log('Set voice to:', voice.name);
+  }
+  
+  utterance.rate = 0.9;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+
+  // Update UI
+  btn.classList.add('playing');
+  btn.querySelector('span').textContent = t('speaking');
+
+  utterance.onend = () => {
+    btn.classList.remove('playing');
+    btn.querySelector('span').textContent = t('speak');
+    currentUtterance = null;
+  };
+
+  utterance.onerror = (event) => {
+    btn.classList.remove('playing');
+    btn.querySelector('span').textContent = t('speak');
+    currentUtterance = null;
+    console.error('Speech error:', event.error);
+  };
+
+  currentUtterance = utterance;
+  
+  // Ensure voices are loaded before speaking
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length === 0) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      console.log('Voices loaded, now speaking');
+      window.speechSynthesis.speak(utterance);
+    };
+  } else {
+    console.log('Voices already loaded, speaking now');
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
 </script>
 </body>
 </html>
